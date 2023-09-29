@@ -14,11 +14,7 @@ class Category(models.Model):
         "name",
         unique=True,
         max_length=FIELD_LIMITS["category_name_max_char"],
-        validators=(
-            RegexValidator(
-                FIELD_REGEXES["category_name"]
-            ),
-        ),
+        validators=(RegexValidator(FIELD_REGEXES["category_name"]),),
         help_text="Category's name",
     )
     slug = models.SlugField(
@@ -38,8 +34,8 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-    
-    
+
+
 class SubCategory(models.Model):
     """SubCategory model."""
 
@@ -54,11 +50,7 @@ class SubCategory(models.Model):
         "name",
         unique=True,
         max_length=FIELD_LIMITS["subcategory_name_max_char"],
-        validators=(
-            RegexValidator(
-                FIELD_REGEXES["subcategory_name"]
-            ),
-        ),
+        validators=(RegexValidator(FIELD_REGEXES["subcategory_name"]),),
         help_text="Subcategory's name",
     )
     slug = models.SlugField(
