@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from products.models import Category, SubCategory, Product, ProductImage
+from products.models import Category, SubCategory, Product
 
 
 class SubCategoryInline(admin.TabularInline):
@@ -35,16 +35,17 @@ class SubCategoryAdmin(admin.ModelAdmin):
     inlines = (ProductInline,)
 
 
-class ProductImageInline(admin.TabularInline):
-    """Images widget on the Product object creation page."""
-
-    model = ProductImage
-
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Representation of the Product model in the admin panel."""
 
-    list_display = ("id", "name", "slug", "price")
+    list_display = (
+        "id",
+        "name",
+        "slug",
+        "price",
+        "image_small",
+        "image_medium",
+        "image_large",
+    )
     search_fields = ("name",)
-    inlines = (ProductImageInline,)

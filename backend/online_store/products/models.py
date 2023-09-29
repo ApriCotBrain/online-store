@@ -6,6 +6,8 @@ from django.db import models
 from core.field_limits import FIELD_LIMITS
 from core.field_regexes import FIELD_REGEXES
 
+from products.validators import ImageWidthHeightValidator
+
 
 class Category(models.Model):
     """Category model."""
@@ -99,6 +101,39 @@ class Product(models.Model):
         max_length=FIELD_LIMITS["product_slug_max_char"],
         help_text="Product's slug",
     )
+    image_small = models.ImageField(
+        "small image",
+        validators=(
+            ImageWidthHeightValidator(
+                max_width=FIELD_LIMITS["small_product_image_max_width"],
+                max_height=FIELD_LIMITS["small_product_image_max_width"],
+            ),
+        ),
+        help_text="Product's small image",
+        upload_to="media/product/small",
+    )
+    image_medium = models.ImageField(
+        "medium image",
+        validators=(
+            ImageWidthHeightValidator(
+                max_width=FIELD_LIMITS["medium_product_image_max_width"],
+                max_height=FIELD_LIMITS["medium_product_image_max_width"],
+            ),
+        ),
+        help_text="Product's medium image",
+        upload_to="media/product/medium",
+    )
+    image_large = models.ImageField(
+        "medium image",
+        validators=(
+            ImageWidthHeightValidator(
+                max_width=FIELD_LIMITS["large_product_image_max_width"],
+                max_height=FIELD_LIMITS["large_product_image_max_width"],
+            ),
+        ),
+        help_text="Product's large image",
+        upload_to="media/product/large",
+    )
     price = models.DecimalField(
         "price",
         max_digits=FIELD_LIMITS["price_max_digits"],
@@ -118,20 +153,3 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class ProductImage(models.Model):
-    """ProductImage Model."""
-
-    product = models.ForeignKey(
-        Product,
-        verbose_name="product",
-        help_text="product's image",
-        on_delete=models.CASCADE,
-        related_name="images",
-    )
-    image = models.ImageField(
-        "image",
-        help_text="Product's image",
-        upload_to="media/product",
-    )
