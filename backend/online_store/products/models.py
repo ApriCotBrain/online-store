@@ -124,7 +124,7 @@ class Product(models.Model):
         upload_to="media/product/medium",
     )
     image_large = models.ImageField(
-        "medium image",
+        "large image",
         validators=(
             ImageWidthHeightValidator(
                 max_width=FIELD_LIMITS["large_product_image_max_width"],
