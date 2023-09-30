@@ -1,8 +1,27 @@
 """Serializers for the endpoints of 'Api' application v1."""
 
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from products.models import Category, Product, SubCategory
+
+User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for user creation."""
+
+    class Meta:
+        model = User
+        fields = ("username", "password")
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
+
+        return user
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -56,6 +75,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):
         return obj.subcategory.category.name
-    
+
     def get_subcategory(self, obj):
         return obj.subcategory.name
