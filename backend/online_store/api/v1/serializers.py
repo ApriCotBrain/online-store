@@ -1,7 +1,6 @@
 """Serializers for the endpoints of 'Api' application v1."""
 
 from django.contrib.auth import get_user_model
-from django.db.models import Sum, F
 from rest_framework import serializers
 
 from orders.models import ShoppingCart
@@ -98,10 +97,8 @@ class ShoppingCartDetailSerializer(serializers.ModelSerializer):
 
 class ShoppingCartSerializer(serializers.Serializer):
     """Selializer for create, update shopping carts."""
-    
-    customer = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+
+    customer = serializers.HiddenField(default=serializers.CurrentUserDefault())
     amounts = serializers.IntegerField()
     products = serializers.PrimaryKeyRelatedField(
         required=True, queryset=Product.objects.all()

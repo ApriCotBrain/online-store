@@ -28,7 +28,7 @@ class ShoppingCart(models.Model):
         related_name="shopping_carts",
     )
     amounts = models.SmallIntegerField(
-        verbose_name="amont",
+        verbose_name="amount",
         help_text="Product's amount",
         validators=(MinValueValidator(AMOUNT_CONSTRANTS["product_amount_min_value"]),),
     )

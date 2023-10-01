@@ -1,10 +1,14 @@
 """Viewsets for the endpoints of 'Api' application v1."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Sum, F
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
+from api.v1.permissions import IsOwner
 from api.v1.serializers import (
     CategorySerializer,
     ProductSerializer,
@@ -84,7 +88,7 @@ class ShoppingCartViewset(
     description = "API endpoints for working with shopping carts."
 
     queryset = ShoppingCart.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwner)
     serializer_class = ShoppingCartSerializer
 
     def get_serializer_class(self):
@@ -95,3 +99,28 @@ class ShoppingCartViewset(
 
     def get_queryset(self):
         return ShoppingCart.objects.filter(customer=self.request.user)
+
+    @action(
+        detail=False,
+        methods=("GET",),
+        url_path="total",
+        permission_classes=(IsAuthenticated, IsOwner,),
+    )
+    def total(self, request):
+        customer = request.user
+        shopping_carts = ShoppingCart.objects.filter(customer=customer)
+        total_products = shopping_carts.aggregate(total=Sum("amounts"))["total"]
+        total_price = shopping_carts.aggregate(
+            total=Sum(F("products__price") * F("amounts"))
+        )["total"]
+
+        serializer = ShoppingCartDetailSerializer(shopping_carts, many=True)
+        product = serializer.data
+
+        response_data = {
+        "total_products": total_products,
+        "total_price": total_price,
+        "product": product,
+        }
+
+        return Response(response_data)
