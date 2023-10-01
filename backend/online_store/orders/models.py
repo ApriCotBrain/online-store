@@ -20,47 +20,28 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         related_name="shopping_carts",
     )
-    product = models.ManyToManyField(
+    products = models.ForeignKey(
         Product,
-        through='ProductAmount',
         verbose_name="product",
-        help_text="Add to shopping cart",
+        help_text="Product",
+        on_delete=models.CASCADE,
         related_name="shopping_carts",
+    )
+    amounts = models.SmallIntegerField(
+        verbose_name="amont",
+        help_text="Product's amount",
+        validators=(MinValueValidator(AMOUNT_CONSTRANTS["product_amount_min_value"]),),
     )
 
     class Meta:
         verbose_name = "shopping cart"
         verbose_name_plural = "shopping carts"
+        constraints = (
+            models.UniqueConstraint(
+                fields=("customer", "products"),
+                name="unique_customer_products_together",
+            ),
+        )
 
     def __str__(self):
-        return f'{self.customer}'
-    
-
-class ProductAmount(models.Model):
-    """Binding model for the amount of products in the shopping cart."""
-
-    shopping_cart = models.ForeignKey(
-        ShoppingCart,
-        verbose_name="shopping cart",
-        on_delete=models.CASCADE,
-        related_name='product_amounts',
-    )
-    product = models.ForeignKey(
-        Product,
-        verbose_name="product",
-        help_text="product",
-        on_delete=models.CASCADE,
-        related_name='product_amounts',
-    )
-    amount = models.SmallIntegerField(
-        verbose_name='amont',
-        help_text="Specify the number of products.",
-        validators=(MinValueValidator(AMOUNT_CONSTRANTS["product_amount_min_value"]),)
-    )
-
-    class Meta:
-        verbose_name = 'product amount'
-        verbose_name_plural = 'product amounts'
-
-    def __str__(self):
-        return f'{self.shopping_cart_id} {self.product_id}'
+        return f"{self.products.name}{self.amounts}"

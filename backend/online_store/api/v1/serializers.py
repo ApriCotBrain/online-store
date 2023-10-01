@@ -1,8 +1,10 @@
 """Serializers for the endpoints of 'Api' application v1."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Sum, F
 from rest_framework import serializers
 
+from orders.models import ShoppingCart
 from products.models import Category, Product, SubCategory
 
 User = get_user_model()
@@ -78,3 +80,50 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_subcategory(self, obj):
         return obj.subcategory.name
+
+
+class ShoppingCartDetailSerializer(serializers.ModelSerializer):
+    """Selializer for viewing shopping carts."""
+
+    products = ProductSerializer(read_only=True)
+    total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ShoppingCart
+        fields = ("products", "amounts", "total")
+
+    def get_total(self, obj):
+        return obj.products.price * obj.amounts
+
+
+class ShoppingCartSerializer(serializers.Serializer):
+    """Selializer for create, update shopping carts."""
+    
+    customer = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    amounts = serializers.IntegerField()
+    products = serializers.PrimaryKeyRelatedField(
+        required=True, queryset=Product.objects.all()
+    )
+
+    def create(self, validated_data):
+        customer = self.context["request"].user
+        amounts = validated_data["amounts"]
+        products = validated_data["products"]
+
+        existed = ShoppingCart.objects.filter(customer=customer, products=products)
+
+        if existed:
+            existed = existed[0]
+            existed.amounts += amounts
+            existed.save()
+        else:
+            existed = ShoppingCart.objects.create(**validated_data)
+
+        return existed
+
+    def update(self, instance, validated_data):
+        instance.amounts = validated_data["amounts"]
+        instance.save()
+        return instance

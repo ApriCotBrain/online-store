@@ -9,4 +9,9 @@ from orders.models import ShoppingCart
 class ShoppingCartAdmin(admin.ModelAdmin):
     """Representation of the ShoppingCart model in the admin panel."""
 
-    list_display = ("id", "customer",)
+    list_display = (
+        "id",
+        "customer",
+        "products",
+        "amounts",
+    )
