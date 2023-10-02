@@ -84,36 +84,36 @@ class ProductSerializer(serializers.ModelSerializer):
 class ShoppingCartDetailSerializer(serializers.ModelSerializer):
     """Selializer for viewing shopping carts."""
 
-    products = ProductSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
     total = serializers.SerializerMethodField()
 
     class Meta:
         model = ShoppingCart
-        fields = ("products", "amounts", "total")
+        fields = ("product", "amount", "total")
 
     def get_total(self, obj):
-        return obj.products.price * obj.amounts
+        return obj.product.price * obj.amount
 
 
 class ShoppingCartSerializer(serializers.Serializer):
     """Selializer for create, update shopping carts."""
 
     customer = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    amounts = serializers.IntegerField()
-    products = serializers.PrimaryKeyRelatedField(
+    amount = serializers.IntegerField()
+    product = serializers.PrimaryKeyRelatedField(
         required=True, queryset=Product.objects.all()
     )
 
     def create(self, validated_data):
         customer = self.context["request"].user
-        amounts = validated_data["amounts"]
-        products = validated_data["products"]
+        amount = validated_data["amount"]
+        product = validated_data["product"]
 
-        existed = ShoppingCart.objects.filter(customer=customer, products=products)
+        existed = ShoppingCart.objects.filter(customer=customer, product=product)
 
         if existed:
             existed = existed[0]
-            existed.amounts += amounts
+            existed.amount += amount
             existed.save()
         else:
             existed = ShoppingCart.objects.create(**validated_data)
@@ -121,6 +121,6 @@ class ShoppingCartSerializer(serializers.Serializer):
         return existed
 
     def update(self, instance, validated_data):
-        instance.amounts = validated_data["amounts"]
+        instance.amount = validated_data["amount"]
         instance.save()
         return instance

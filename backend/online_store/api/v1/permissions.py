@@ -6,4 +6,4 @@ class IsOwner(BasePermission):
     """Requests are allowed are allowed only to the owner."""
 
     def has_object_permission(self, request, view, obj):
-        return obj.author == request.user
+        return obj.customer == request.user

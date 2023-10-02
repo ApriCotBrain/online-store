@@ -12,6 +12,6 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "customer",
-        "products",
-        "amounts",
+        "product",
+        "amount",
     )

@@ -20,14 +20,14 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         related_name="shopping_carts",
     )
-    products = models.ForeignKey(
+    product = models.ForeignKey(
         Product,
         verbose_name="product",
         help_text="Product",
         on_delete=models.CASCADE,
         related_name="shopping_carts",
     )
-    amounts = models.SmallIntegerField(
+    amount = models.SmallIntegerField(
         verbose_name="amount",
         help_text="Product's amount",
         validators=(MinValueValidator(AMOUNT_CONSTRANTS["product_amount_min_value"]),),
@@ -38,10 +38,10 @@ class ShoppingCart(models.Model):
         verbose_name_plural = "shopping carts"
         constraints = (
             models.UniqueConstraint(
-                fields=("customer", "products"),
-                name="unique_customer_products_together",
+                fields=("customer", "product"),
+                name="unique_customer_product_together",
             ),
         )
 
     def __str__(self):
-        return f"{self.products.name}{self.amounts}"
+        return f"{self.product.name}{self.amount}"

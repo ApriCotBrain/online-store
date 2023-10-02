@@ -2,7 +2,7 @@
 
 from django.contrib.auth import get_user_model
 from django.db.models import Sum, F
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -17,6 +17,7 @@ from api.v1.serializers import (
     SubCategorySerializer,
     UserSerializer,
 )
+from api.v1.viewsets import GetPostPatchDeleteViewSet
 from core.misc_constants import PAGE_CONSTANTS
 from orders.models import ShoppingCart
 from products.models import Category, Product, SubCategory
@@ -76,12 +77,7 @@ class ProductViewSet(
     pagination_class.page_size = PAGE_CONSTANTS["product_number_per_page"]
 
 
-class ShoppingCartViewset(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class ShoppingCartViewset(GetPostPatchDeleteViewSet):
     """URL requests handler to 'ShoppingCarts' resource endpoints."""
 
     name = "ShoppingCart resource"
@@ -109,9 +105,9 @@ class ShoppingCartViewset(
     def total(self, request):
         customer = request.user
         shopping_carts = ShoppingCart.objects.filter(customer=customer)
-        total_products = shopping_carts.aggregate(total=Sum("amounts"))["total"]
+        total_products = shopping_carts.aggregate(total=Sum("amount"))["total"]
         total_price = shopping_carts.aggregate(
-            total=Sum(F("products__price") * F("amounts"))
+            total=Sum(F("product__price") * F("amount"))
         )["total"]
 
         serializer = ShoppingCartDetailSerializer(shopping_carts, many=True)
@@ -120,7 +116,19 @@ class ShoppingCartViewset(
         response_data = {
         "total_products": total_products,
         "total_price": total_price,
-        "product": product,
+        "products": product,
         }
 
         return Response(response_data)
+    
+    @action(
+        detail=False,
+        methods=("DELETE",),
+        url_path="clear",
+        permission_classes=(IsAuthenticated, IsOwner,),
+    )
+    def clear(self, request):
+        customer = request.user
+        shopping_carts = ShoppingCart.objects.filter(customer=customer)
+        shopping_carts.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
