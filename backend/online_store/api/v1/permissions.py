@@ -2,6 +2,7 @@
 
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
+
 class IsOwner(BasePermission):
     """Requests are allowed are allowed only to the owner."""
 

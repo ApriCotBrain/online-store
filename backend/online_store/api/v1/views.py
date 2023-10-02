@@ -100,7 +100,10 @@ class ShoppingCartViewset(GetPostPatchDeleteViewSet):
         detail=False,
         methods=("GET",),
         url_path="total",
-        permission_classes=(IsAuthenticated, IsOwner,),
+        permission_classes=(
+            IsAuthenticated,
+            IsOwner,
+        ),
     )
     def total(self, request):
         customer = request.user
@@ -114,18 +117,21 @@ class ShoppingCartViewset(GetPostPatchDeleteViewSet):
         product = serializer.data
 
         response_data = {
-        "total_products": total_products,
-        "total_price": total_price,
-        "products": product,
+            "total_products": total_products,
+            "total_price": total_price,
+            "products": product,
         }
 
         return Response(response_data)
-    
+
     @action(
         detail=False,
         methods=("DELETE",),
         url_path="clear",
-        permission_classes=(IsAuthenticated, IsOwner,),
+        permission_classes=(
+            IsAuthenticated,
+            IsOwner,
+        ),
     )
     def clear(self, request):
         customer = request.user
